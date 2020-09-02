@@ -1,9 +1,15 @@
 import Transaction from '../models/Transaction';
+import { response } from 'express';
 
 interface Balance {
   income: number;
   outcome: number;
   total: number;
+}
+interface CreateTransaction {
+  title:string;
+  value:number;
+  type:'income'|'outcome';
 }
 
 class TransactionsRepository {
@@ -15,14 +21,43 @@ class TransactionsRepository {
 
   public all(): Transaction[] {
     // TODO
+    return this.transactions;
   }
 
   public getBalance(): Balance {
     // TODO
+    const balance = this.transactions.reduce((acc:Balance,transaction:Transaction)=>{
+        switch (transaction.type){
+          case "income":
+            acc.income += transaction.value;
+            break;
+            case "outcome":
+              acc.outcome += transaction.value;
+              break;
+
+              default:
+                break;
+        }
+        acc.total = acc.income-acc.outcome;
+        return acc;
+    },
+    {
+      income: 0,
+      outcome: 0,
+      total: 0
+    }
+    );
+    return balance;
+   
   }
 
-  public create(): Transaction {
+  public create({title,value,type}:CreateTransaction): Transaction {
     // TODO
+    const transaction = new Transaction({title,value,type});
+  
+    this.transactions.push(transaction);
+
+    return transaction;
   }
 }
 
